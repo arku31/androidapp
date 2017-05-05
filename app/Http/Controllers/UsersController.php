@@ -1,20 +1,20 @@
 <?php
-
-use App\Http\Controllers\Controller;
+namespace App\Http\Controllers;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 
 class UsersController extends Controller
 {
 
-    public function balance()
+    public function balance(Request $request)
     {
-        $balance = Input::only('set');
+        $balance = $request->input('set');
         $user = Auth::user();
-        if (isset($balance) && isset($balance['set'])) {
-            $user->balance = $balance['set'];
+        if ($balance) {
+            $user->balance = $balance;
             $user->save();
         }
-        return ['status' => 'success', 'balance' => $user->balance];
+        return ['status' => 'success', 'balance' => $balance];
     }
 }

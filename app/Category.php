@@ -13,6 +13,6 @@ class Category extends Model
 
     public function transactions()
     {
-        return $this->hasMany('Operation', 'category_id');
+        return $this->hasMany('\App\Operation', 'category_id');
     }
 }

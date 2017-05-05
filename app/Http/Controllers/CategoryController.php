@@ -1,4 +1,7 @@
 <?php
+namespace App\Http\Controllers;
+
+use App\Category;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,99 +28,74 @@ class CategoryController extends Controller
      * Store a newly created resource in storage.
      * POST /category
      *
+     * @param Request $request
      * @return array
      */
-    public function store()
+    public function store(Request $request)
     {
-        $inputs = Input::only('title');
+        $title = $request->title;
 
-        if (!isset($inputs))
-            return array('status' => 'Error');
-
-        if (isset($inputs['title']))
-            $title = $inputs['title'];
-        else
-            return array('status' => 'Error');
+        if (empty($title)) {
+            return ['status' => 'Error'];
+        }
 
         $cat = new Category;
         $cat->title = $title;
         $cat->user_id = Auth::id();
         $cat->save();
 
-        return array('status' => 'success', 'data' => $cat);
+        return ['status' => 'success', 'data' => $cat];
     }
 
     /**
      * Display the specified resource.
-     * GET /category/{id}
+     * GET /categories/{id}
      *
      * @param  int $id
      * @return Response
      */
     public function show($id)
     {
-        $cat = Category::with('transactions')->whereId($id)->get();
-        return $cat;
-
+        return Category::with('transactions')->whereId($id)->get();
     }
 
     /**
-     * Show the form for editing the specified resource.
-     * GET /category/{id}/edit
      *
-     * @param  int $id
-     * @return Response
+     * @param Request $request
+     * @return array
      */
-    public function edit()
+    public function edit(Request $request)
     {
-        $id = Input::only('id');
-        if (!isset($id)) {
-            return array('status' => 'Error');
+        $id = $request->input('id');
+        $title = $request->title;
+        if (empty($id) || empty($title)) {
+            return ['status' => 'Error'];
         }
-        if (isset($id['id']))
-            $id = $id['id'];
-
-        if (Category::whereId($id)->count() != 1) {
-            return array('status' => 'Wrong id');
+        if (Category::find($id) == null) {
+            return ['status' => 'Wrong id'];
         }
 
-        $title = Input::only('title');
-        if (!isset($title)) {
-            return array('status' => 'Error');
-        }
-
-        if (isset($title['title']))
-            $title = $title['title'];
-
-        $cat = Category::whereId($id)->first();
+        $cat = Category::find($id);
         $cat->title = $title;
         $cat->save();
 
-        return array('status' => 'success', 'data' => $cat);
-
+        return ['status' => 'success', 'data' => $cat];
     }
 
-    /**
-     * Remove the specified resource from storage.
-     * DELETE /category/{id}
-     *
-     * @param  int $id
-     * @return array
-     */
-    public function destroy()
+    public function destroy(Request $request)
     {
-        $id = Input::only('id');
-        if (Category::whereId($id)->count() != 1) {
-            return array('status' => 'Wrong id');
+        $id = $request->id;
+        if (Category::find($id) == null) {
+            return ['status' => 'Wrong id'];
         }
 
-        return array('status' => 'success', 'data' => Category::whereId($id)->delete());
+        return ['status' => 'success', 'data' => Category::destroy($id)];
     }
 
 
-    public function synch()
+    public function synch(Request $request)
     {
-        $cats = json_decode(Input::only('data')['data']);
+        $cats = json_decode($request->data);
         if (count($cats) > 0) {
             $old_cats = Category::whereUserId(Auth::ID())->delete();
             foreach ($cats as $cat) {
@@ -128,7 +106,7 @@ class CategoryController extends Controller
                 $nc->save();
             }
         } else {
-            return array('status' => 'Error');
+            return ['status' => 'Error'];
         }
 
         $new_cats = Category::whereUserId(Auth::id())->get();

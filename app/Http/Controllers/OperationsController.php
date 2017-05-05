@@ -1,6 +1,7 @@
 <?php
-
+namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
+use App\Operation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 
