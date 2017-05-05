@@ -17,6 +17,13 @@ class AuthController extends Controller
         $login = $request->login;
         $password = $request->password;
         $register = $request->register;
+        $social_token = $request->social_token;
+        $social_user_id = $request->social_user_id;
+
+        if ($social_token && $social_user_id) {
+            return $this->loginWithToken($request);
+        }
+
         if (!isset($login) || !isset($password))
             return ['status' => 'Input error'];
         if (isset($register) && $register == 1) {
@@ -57,8 +64,30 @@ class AuthController extends Controller
     {
         if (Auth::check()) {
             Auth::logout();
-            return ['status' => 'success'];
         }
-        return ['status' => ''];
+        return ['status' => 'success'];
+    }
+
+    private function loginWithToken($request)
+    {
+        $user = User::where('social_user_id', $request->social_user_id)->first();
+        if (empty($user)) {
+            $user = new User();
+            $user->social_user_id = $request->social_user_id;
+            $user->social_token = $request->social_token;
+            $user->login = 'user_'.$request->social_user_id;
+            $user->password = md5($request->social_token);
+            $user->save();
+            Auth::loginUsingId($user->id, true);
+        } elseif ($user->social_token == $request->social_token) {
+            Auth::loginUsingId($user->id, true);
+        } else {
+            return ['status' => 'wrong password'];
+        }
+        return response([
+            'status' => 'success',
+            'id' => $user->id,
+            'auth_token' => Auth::user()->remember_token
+        ]);
     }
 }
