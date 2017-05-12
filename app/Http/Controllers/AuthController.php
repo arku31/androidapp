@@ -17,15 +17,15 @@ class AuthController extends Controller
         $login = $request->login;
         $password = $request->password;
         $register = $request->register;
-        $social_token = $request->social_token;
         $social_user_id = $request->social_user_id;
 
-        if ($social_token && $social_user_id) {
+        if ($social_user_id) {
             return $this->loginWithToken($request);
         }
 
-        if (!isset($login) || !isset($password))
+        if (!isset($login) || !isset($password)) {
             return ['status' => 'Input error'];
+        }
         if (isset($register) && $register == 1) {
             if (User::whereLogin($login)->count() != 0) {
                 return ['status' => 'Login busy already'];
@@ -45,7 +45,7 @@ class AuthController extends Controller
             }
             if ($user && $user->password == $password) {
                 if ($user->remember_token) {
-                    $user->remember_token = NULL;
+                    $user->remember_token = null;
                     $user->save();
                 }
                 Auth::loginUsingId($user->id, true);
@@ -74,15 +74,12 @@ class AuthController extends Controller
         if (empty($user)) {
             $user = new User();
             $user->social_user_id = $request->social_user_id;
-            $user->social_token = $request->social_token;
             $user->login = 'user_'.$request->social_user_id;
             $user->password = md5($request->social_token);
             $user->save();
             Auth::loginUsingId($user->id, true);
-        } elseif ($user->social_token == $request->social_token) {
-            Auth::loginUsingId($user->id, true);
         } else {
-            return ['status' => 'wrong password'];
+            return ['status' => 'wrong social_token'];
         }
         return response([
             'status' => 'success',
