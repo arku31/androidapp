@@ -79,7 +79,7 @@ class AuthController extends Controller
             $user->save();
             Auth::loginUsingId($user->id, true);
         } else {
-            return ['status' => 'wrong social_token'];
+            Auth::loginUsingId($user->id, true);
         }
         return response([
             'status' => 'success',
