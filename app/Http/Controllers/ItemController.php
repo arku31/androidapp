@@ -55,7 +55,7 @@ class ItemController extends Controller
                 'validation_rules' => $validation
             ]);
         }
-        return Item::where('type', $request->type)->get();
+        return Item::where('type', $request->type)->orderBy('created_at', 'desc')->get();
     }
 
     public function validate(Request $request, array $rules, array $messages = [], array $customAttributes = [])
