@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Item;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ItemController extends Controller
 {
@@ -24,6 +25,7 @@ class ItemController extends Controller
         $item->price = $request->price;
         $item->name = $request->name;
         $item->type = $request->type;
+        $item->user_id = Auth::id();
         $item->save();
         return response(['status' => 'success', 'id' => $item->id]);
     }
@@ -55,7 +57,9 @@ class ItemController extends Controller
                 'validation_rules' => $validation
             ]);
         }
-        return Item::where('type', $request->type)->orderBy('created_at', 'desc')->get();
+        return Item::where('type', $request->type)
+            ->where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')->get();
     }
 
     public function validate(Request $request, array $rules, array $messages = [], array $customAttributes = [])
