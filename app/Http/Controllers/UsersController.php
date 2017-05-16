@@ -19,12 +19,18 @@ class UsersController extends Controller
         $total_expenses = 0;
         $total_income = 0;
 
-        Item::where('type', 'expense')->get()->each( function($item) use (&$total_expenses){
-            $total_expenses+=$item->price;
-        });
-        Item::where('type', 'income')->get()->each( function($item) use (&$total_income){
-            $total_income+=$item->price;
-        });
+        Item::where('user_id', Auth::id())
+            ->where('type', 'expense')
+            ->get()
+            ->each(function ($item) use (&$total_expenses) {
+                $total_expenses+=$item->price;
+            });
+        Item::where('user_id', Auth::id())
+            ->where('type', 'income')
+            ->get()
+            ->each(function ($item) use (&$total_income) {
+                $total_income+=$item->price;
+            });
         return [
             'status' => 'success',
             'balance' => $user->balance,
