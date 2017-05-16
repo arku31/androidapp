@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\User;
 use Closure;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Response;
@@ -40,8 +41,16 @@ class AuthjsonMiddleware
      */
     public function handle($request, Closure $next, ...$guards)
     {
-        if (Auth::guest()) {
-            return response(["status" => "unauthorized"]);
+        $token = $request->input('auth-token');
+        if (Auth::guest() && empty($token)) {
+            return response(["status" => "unauthorized", 'token' => $token]);
+        } else {
+            $user = User::where('remember_token', $token)->first();
+            if ($user) {
+                Auth::loginUsingId($user->id);
+            } else {
+                return \response(['status' => 'bad token']);
+            }
         }
         return $next($request);
     }
