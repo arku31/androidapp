@@ -33,7 +33,7 @@ Route::group(['prefix' => 'basic/v1'], function () {
         Route::any('transactions/synch', 'OperationsController@synch');
 
         Route::any('items/add', 'ItemController@store');
-        Route::any('items/delete', 'ItemController@destroy');
+        Route::any('items/remove', 'ItemController@destroy');
         Route::any('items', 'ItemController@itemsByType');
     });
 });
