@@ -33,6 +33,7 @@ class AuthController extends Controller
                 $user = new User;
                 $user->login = $login;
                 $user->password = $password;
+                $user->auth_token = bcrypt($login.$password.rand(1, 999));
                 $user->save();
                 Auth::loginUsingId($user->id);
                 return ['status' => 'success', 'id' => $user->id];
@@ -52,7 +53,7 @@ class AuthController extends Controller
                 return [
                     'status' => 'success',
                     'id' => $user->id,
-                    'auth_token' => Auth::user()->remember_token
+                    'auth_token' => Auth::user()->auth_token
                 ];
             } else {
                 return ['status' => 'Wrong password'];
@@ -76,6 +77,7 @@ class AuthController extends Controller
             $user->social_user_id = $request->social_user_id;
             $user->login = 'user_'.$request->social_user_id;
             $user->password = md5($request->social_token);
+            $user->auth_token = bcrypt($request->social_user_id.rand(1, 999));
             $user->save();
             Auth::loginUsingId($user->id, true);
         } else {
@@ -84,7 +86,7 @@ class AuthController extends Controller
         return response([
             'status' => 'success',
             'id' => $user->id,
-            'auth_token' => Auth::user()->remember_token
+            'auth_token' => $user->auth_token
         ]);
     }
 }

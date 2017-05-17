@@ -45,7 +45,7 @@ class AuthjsonMiddleware
         if (Auth::guest() && empty($token)) {
             return response(["status" => "unauthorized", 'token' => $token]);
         } else {
-            $user = User::where('remember_token', $token)->first();
+            $user = User::where('auth_token', $token)->first();
             if ($user) {
                 Auth::loginUsingId($user->id);
             } else {
